@@ -24,10 +24,10 @@ class Bj
       cur_rails_env = Bj.rails_env.to_s
       new_rails_env = options[:rails_env].to_s
 
-      cur_spec = configurations[cur_rails_env]
-      table.establish_connection(cur_spec) unless table.connected?
+      ActiveRecord::Base.configurations = configurations
+      table.establish_connection(cur_rails_env) unless table.connected?
 
-      if(new_rails_env.empty? or cur_rails_env == new_rails_env) 
+      if(new_rails_env.empty? or cur_rails_env == new_rails_env)
         table.transaction{ block.call(table.connection) }
       else
         new_spec = configurations[new_rails_env]
@@ -54,7 +54,7 @@ class Bj
             block.call(@chrooted)
           end
         ensure
-          @chrooted = chrooted 
+          @chrooted = chrooted
         end
       else
         Dir.chdir(@chrooted = rails_root)
