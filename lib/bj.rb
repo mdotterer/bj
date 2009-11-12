@@ -1,22 +1,22 @@
-unless defined? Bj 
-  class Bj 
+unless defined? Bj
+  class Bj
   #
   # constants and associated attrs
   #
-    Bj::VERSION = "1.0.2" #unless defined?(Bj::VERSION)
+    Bj::VERSION = "1.0.1" #unless defined? Bj::VERSION
     def self.version() Bj::VERSION end
 
     Bj::LIBDIR = File.expand_path(File::join(File.dirname(__FILE__), "bj")) + File::SEPARATOR unless
       defined? Bj::LIBDIR
-    def self.libdir(*value) 
+    def self.libdir(*value)
       unless value.empty?
         File.join libdir, *value
       else
-        Bj::LIBDIR 
+        Bj::LIBDIR
       end
     end
 
-    module EXIT 
+    module EXIT
       SUCCESS = 0
       FAILURE = 1
       WARNING = 42
@@ -32,19 +32,33 @@ unless defined? Bj
     require "erb"
     require "tempfile"
   #
-  # bootstrap rubygems 
+  # bootstrap rubygems
   #
     begin
       require "rubygems"
     rescue LoadError
       42
     end
+
+    # Add vendored activerecord to the load path
+    vendored_path = File.expand_path(File.join(RAILS_ROOT, "vendor", "rails", "activerecord", "lib"))
+    if File.directory?(vendored_path) && !$LOAD_PATH.include?(vendored_path)
+      $LOAD_PATH << vendored_path
+    end
+
+    #Add vendored gems to the load path
+    Dir[File.join(RAILS_ROOT, 'vendor', 'gems', '*', 'lib')].each do |rel_path|
+      expanded_path = File.expand_path(rel_path)
+      $LOAD_PATH << expanded_path unless $LOAD_PATH.include?(expanded_path)
+    end
+
   #
   # rubyforge/remote
   #
     require "active_record"
+
   #
-  # rubyforge/remote or local/lib 
+  # rubyforge/remote or local/lib
   #
     #%w[ attributes systemu orderedhash ].each do |lib|
     %w[ systemu orderedhash ].each do |lib|
@@ -55,7 +69,7 @@ unless defined? Bj
       end
     end
   #
-  # local 
+  # local
   #
     load libdir("attributes.rb")
     load libdir("stdext.rb")
